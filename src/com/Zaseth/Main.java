@@ -444,6 +444,13 @@ class ByteArrayJava {
         }
         return out;
     }
+    public void write7BitEncodedInt(int value) {
+        while (value >= 0x80) {
+            this.writeInt8((byte) value | 0x80);
+            value = value >> 7;
+        }
+        this.writeInt8((byte) value);
+    }
     /*
     Reading varint and varuint functions
      */
@@ -504,6 +511,17 @@ class ByteArrayJava {
             }
         }
         return value | (rb << i);
+    }
+    public int read7BitEncodedInt() {
+        int i = 0;
+        int shift = 0;
+        byte b;
+        do {
+            b = this.readInt8();
+            i |= (b & 0x7f) << shift;
+            shift += 7;
+        } while ((b & 0x80) != 0);
+        return i;
     }
     /*
     Read int and uint functions
