@@ -1,0 +1,7 @@
+language: java
+cache: bundler
+sudo: false
+rvm: 2.2
+
+install: src/com/Zaseth/
+script: src/com/Zaseth/
