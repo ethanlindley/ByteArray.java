@@ -448,7 +448,7 @@ class ByteArrayJava {
 	Read int and uint functions
 	*/
 	public int readInt8() {
-		return this.data[this.position++];
+		return this.data[this.position++] & 0xff;
 	}
 
 	public byte readRawByte() {
@@ -457,9 +457,8 @@ class ByteArrayJava {
 
 	public int readInt16() {
 		if (this.endian) {
-			return this.data[this.position++] << 8 | this.data[this.position++];
+			return this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
 		} else {
-			return this.data[this.position++] | this.data[this.position++] << 8;
 		}
 	}
 
@@ -711,9 +710,9 @@ class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeVarUInt64(-58);
+		wba.writeInt8(54);
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		System.out.print(rba.readVarUInt64());
+		System.out.print(rba.readInt8());
 		System.out.print(wba.arrayToString());
 	}
 }
