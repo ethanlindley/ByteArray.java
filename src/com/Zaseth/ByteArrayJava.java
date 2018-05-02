@@ -140,6 +140,15 @@ class ByteArrayJava {
 		}
 	}
 
+	private void checkOffset(int offset, int ext, int length) {
+		if ((offset % 1) != 0 || offset < 0) {
+			throw new IllegalArgumentException("Offset is not uint");
+		}
+		if (offset + ext > length) {
+			throw new ArrayIndexOutOfBoundsException("Trying to access beyond buffer length");
+		}
+	}
+
 	/*
 	Writing int and uint functions
 	 */
@@ -147,7 +156,7 @@ class ByteArrayJava {
 		v = +v;
 		this.checkInt(v, this.position, 1, 0x7f, -0x80);
 		if (v < 0) v = 0xff + v + 1;
-		this.data[this.position++] = (byte) (v & 0xff);
+		this.data[this.position++] = (byte) v;
 	}
 
 	public void writeRawByte(int v) {
@@ -159,9 +168,9 @@ class ByteArrayJava {
 		this.checkInt(v, this.position, 2, 0x7fff, -0x8000);
 		if (this.endian) {
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 		}
 	}
@@ -172,9 +181,9 @@ class ByteArrayJava {
 		if (this.endian) {
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 		}
@@ -210,9 +219,9 @@ class ByteArrayJava {
 			this.data[this.position++] = (byte) (v >> 24);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 24);
@@ -226,9 +235,9 @@ class ByteArrayJava {
 			this.data[this.position++] = (byte) (v >> 24);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 24);
@@ -244,9 +253,9 @@ class ByteArrayJava {
 			this.data[this.position++] = (byte) (v >> 24);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 24);
@@ -264,9 +273,9 @@ class ByteArrayJava {
 			this.data[this.position++] = (byte) (v >> 24);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 24);
@@ -286,9 +295,9 @@ class ByteArrayJava {
 			this.data[this.position++] = (byte) (v >> 24);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 8);
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 		} else {
-			this.data[this.position++] = (byte) (v & 0xff);
+			this.data[this.position++] = (byte) v;
 			this.data[this.position++] = (byte) (v >> 8);
 			this.data[this.position++] = (byte) (v >> 16);
 			this.data[this.position++] = (byte) (v >> 24);
@@ -451,7 +460,8 @@ class ByteArrayJava {
 	Read int and uint functions
 	*/
 	public int readInt8() {
-		return this.data[this.position++] & 0xff;
+		this.checkOffset(this.position, 1, this.length());
+		return this.data[this.position++];
 	}
 
 	public byte readRawByte() {
@@ -459,10 +469,197 @@ class ByteArrayJava {
 	}
 
 	public int readInt16() {
+		this.checkOffset(this.position, 2, this.length());
+		if (this.endian) {
+			return this.data[this.position++] << 8 | this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8;
+		}
+	}
+
+	public int readInt24() {
+		this.checkOffset(this.position, 3, this.length());
+		if (this.endian) {
+			return this.data[this.position++] << 16 | this.data[this.position++] << 8 | this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16;
+		}
+	}
+
+	public int readInt29() {
+		int total = this.readInt8();
+		if (total < 128) {
+			return total;
+		}
+		total = (total & 0x7f) << 7;
+		int nextByte = this.readInt8();
+		if (nextByte < 128) {
+			total = total | nextByte;
+		} else {
+			total = (total | nextByte & 0x7f) << 7;
+			nextByte = this.readInt8();
+			if (nextByte < 128) {
+				total = total | nextByte;
+			} else {
+				total = (total | nextByte & 0x7f) << 8;
+				nextByte = this.readInt8();
+				total = total | nextByte;
+			}
+		}
+		int mask = 1 << 28;
+		return -(total & mask) | total;
+	}
+
+	public int readInt32() {
+		this.checkOffset(this.position, 4, this.length());
+		if (this.endian) {
+			return this.data[this.position++] << 24 | this.data[this.position++] << 16 | this.data[this.position++] << 8
+					| this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24;
+		}
+	}
+
+	public long readInt40() {
+		if (this.endian) {
+			return this.data[this.position++] << 32 | this.data[this.position++] << 24 | this.data[this.position++] << 16
+					| this.data[this.position++] << 8 | this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32;
+		}
+	}
+
+	public long readInt48() {
+		if (this.endian) {
+			return this.data[this.position++] << 40 | this.data[this.position++] << 32 | this.data[this.position++] << 24
+					| this.data[this.position++] << 16 | this.data[this.position++] << 8 | this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40;
+		}
+	}
+
+	public long readInt56() {
+		if (this.endian) {
+			return this.data[this.position++] << 48 | this.data[this.position++] << 40 | this.data[this.position++] << 32
+					| this.data[this.position++] << 24 | this.data[this.position++] << 16 | this.data[this.position++] << 8
+					| this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40
+					| this.data[this.position++] << 48;
+		}
+	}
+
+	public long readInt64() {
+		if (this.endian) {
+			return this.data[this.position++] << 56 | this.data[this.position++] << 48 | this.data[this.position++] << 40
+					| this.data[this.position++] << 32 | this.data[this.position++] << 24 | this.data[this.position++] << 16
+					| this.data[this.position++] << 8 | this.data[this.position++];
+		} else {
+			return this.data[this.position++] | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40
+					| this.data[this.position++] << 48 | this.data[this.position++] << 56;
+		}
+	}
+
+	public int readUInt8() {
+		this.checkOffset(this.position, 1, this.length());
+		return this.data[this.position++] & 0xff;
+	}
+
+	public int readUInt16() {
+		this.checkOffset(this.position, 2, this.length());
 		if (this.endian) {
 			return this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
 		} else {
 			return this.data[this.position++] & 0xff | this.data[this.position++] << 8;
+		}
+	}
+
+	public int readUInt24() {
+		this.checkOffset(this.position, 3, this.length());
+		if (this.endian) {
+			return this.data[this.position++] << 16 | this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16;
+		}
+	}
+
+	public int readUInt29() {
+		int b = this.readUInt8() & 0xFF;
+		if (b < 128) {
+			return b;
+		}
+		int value = (b & 0x7F) << 7;
+		b = this.readUInt8() & 0xFF;
+		if (b < 128) {
+			return (value | b);
+		}
+		value = (value | (b & 0x7F)) << 7;
+		b = this.readUInt8() & 0xFF;
+		if (b < 128) {
+			return (value | b);
+		}
+		value = (value | (b & 0x7F)) << 8;
+		b = this.readUInt8() & 0xFF;
+		return (value | b);
+	}
+
+	public int readUInt32() {
+		this.checkOffset(this.position, 4, this.length());
+		if (this.endian) {
+			return this.data[this.position++] << 24 | this.data[this.position++] << 16 | this.data[this.position++] << 8
+					| this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24;
+		}
+	}
+
+	public long readUInt40() {
+		if (this.endian) {
+			return this.data[this.position++] << 32 | this.data[this.position++] << 24 | this.data[this.position++] << 16
+					| this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32;
+		}
+	}
+
+	public long readUInt48() {
+		if (this.endian) {
+			return this.data[this.position++] << 40 | this.data[this.position++] << 32 | this.data[this.position++] << 24
+					| this.data[this.position++] << 16 | this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40;
+		}
+	}
+
+	public long readUInt56() {
+		if (this.endian) {
+			return this.data[this.position++] << 48 | this.data[this.position++] << 40 | this.data[this.position++] << 32
+					| this.data[this.position++] << 24 | this.data[this.position++] << 16 | this.data[this.position++] << 8
+					| this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40
+					| this.data[this.position++] << 48;
+		}
+	}
+
+	public long readUInt64() {
+		if (this.endian) {
+			return this.data[this.position++] << 56 | this.data[this.position++] << 48 | this.data[this.position++] << 40
+					| this.data[this.position++] << 32 | this.data[this.position++] << 24 | this.data[this.position++] << 16
+					| this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
+		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8 | this.data[this.position++] << 16
+					| this.data[this.position++] << 24 | this.data[this.position++] << 32 | this.data[this.position++] << 40
+					| this.data[this.position++] << 48 | this.data[this.position++] << 56;
 		}
 	}
 
@@ -480,12 +677,14 @@ class ByteArrayJava {
 	/*
 	Reads IEEE 754 single-precision (32-bit) and IEEE 754 double-precision (64-bit) functions
 	 */
-	/*public double readDouble() {
+	public double readDouble() {
 		return Double.longBitsToDouble(this.readInt64());
 	}
+
 	public float readFloat() {
 		return Float.intBitsToFloat(this.readInt32());
-	}*/
+	}
+
 	/*
 	Writing varint and varuint functions
 	 */
@@ -500,10 +699,10 @@ class ByteArrayJava {
 	public void writeVarInt32(int value) {
 		while (true) {
 			if ((value & ~0x7F) == 0) {
-				this.writeRawByte(value);
+				this.writeInt8(value);
 				return;
 			} else {
-				this.writeRawByte((value & 0x7F) | 0x80);
+				this.writeInt8((value & 0x7F) | 0x80);
 				value >>>= 7;
 			}
 		}
@@ -512,10 +711,10 @@ class ByteArrayJava {
 	public void writeVarInt64(long value) {
 		while (true) {
 			if ((value & ~0x7F) == 0) {
-				this.writeRawByte((int) value);
+				this.writeInt8((int) value);
 				return;
 			} else {
-				this.writeRawByte(((int) value & 0x7F) | 0x80);
+				this.writeInt8(((int) value & 0x7F) | 0x80);
 				value >>>= 7;
 			}
 		}
@@ -700,7 +899,7 @@ class ByteArrayJava {
 			}
 			array.add((char) this.data[i]);
 		}
-		System.out.println("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used.
+		System.out.println("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used
 		return array;
 	}
 
@@ -714,7 +913,7 @@ class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeInt8(54);
+		wba.writeInt8(69);
 		ByteArrayJava rba = new ByteArrayJava(wba);
 		System.out.println(rba.readInt8());
 		System.out.println(wba.toString());
