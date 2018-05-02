@@ -110,7 +110,7 @@ class ByteArrayJava {
 		} else if (prevLength < newLength) {
 			this.data = new byte[this.length() + (newLength - prevLength)];
 			int i = 0;
-			for (Byte b :  new ArrayList<byte[]>(Arrays.asList(this.data)).toArray(new Byte[this.length() + (newLength - prevLength)])) {
+			for (Byte b : new ArrayList<byte[]>(Arrays.asList(this.data)).toArray(new Byte[this.length() + (newLength - prevLength)])) {
 				this.data[i++] = b.byteValue();
 			}
 		} else if (prevLength > newLength) {
