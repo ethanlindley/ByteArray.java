@@ -1,4 +1,7 @@
 # ByteArray.java (Under development)
+
+[![Build Status](https://travis-ci.org/Zaseth/ByteArray.java.svg?branch=master)](https://travis-ci.org/Zaseth/ByteArray.java)
+
 A very simple script for writing and reading bytes in Java
 
 This supports **Big endian and Little endian**.
