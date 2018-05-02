@@ -459,6 +459,7 @@ class ByteArrayJava {
 		if (this.endian) {
 			return this.data[this.position++] << 8 | this.data[this.position++] & 0xff;
 		} else {
+			return this.data[this.position++] & 0xff | this.data[this.position++] << 8;
 		}
 	}
 
