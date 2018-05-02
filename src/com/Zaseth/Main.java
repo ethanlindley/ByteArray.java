@@ -1,8 +1,10 @@
 package com.Zaseth;
 
+import java.lang.reflect.Array;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.io.UTFDataFormatException;
 
@@ -126,6 +128,9 @@ class ByteArrayJava {
         this.checkInt(v, this.position, 1, 0x7f, -0x80);
         if (v < 0) v = 0xff + v + 1;
         this.data[this.position++] = (byte) (v & 0xff);
+    }
+    public void writeRawByte(int v) {
+        this.data[this.position++] = (byte) v;
     }
     public void writeInt16(int v) {
         v = +v;
@@ -405,128 +410,12 @@ class ByteArrayJava {
         }
     }
     /*
-    Writing varint and varuint functions
-     */
-    public void writeSignedVarLong(long value) {
-        this.writeUnsignedVarLong((value << 1) ^ (value >> 63));
-    }
-    public void writeSignedVarInt(int value) {
-        this.writeUnsignedVarInt((value << 1) ^ (value >> 31));
-    }
-    public byte[] writeSignedVarInt(int value) {
-        return this.writeUnsignedVarInt((value << 1) ^ (value >> 31));
-    }
-    public void writeUnsignedVarLong(long value) {
-        while ((value & 0xFFFFFFFFFFFFFF80L) != 0L) {
-            this.writeInt8(((int) value & 0x7F) | 0x80);
-            value >>>= 7;
-        }
-        this.writeInt8((int) value & 0x7F);
-    }
-    public void writeUnsignedVarInt(int value) {
-        while ((value & 0xFFFFFF80) != 0L) {
-            this.writeInt8((value & 0x7F) | 0x80);
-            value >>>= 7;
-        }
-        this.writeInt8(value & 0x7F);
-    }
-    public byte[] writeUnsignedVarInt(int value) {
-        byte[] byteArrayList = new byte[10];
-        int i = 0;
-        while ((value & 0xFFFFFF80) != 0L) {
-            byteArrayList[i++] = ((byte) ((value & 0x7F) | 0x80));
-            value >>>= 7;
-        }
-        byteArrayList[i] = ((byte) (value & 0x7F));
-        byte[] out = new byte[i + 1];
-        for (; i >= 0; i--) {
-            out[i] = byteArrayList[i];
-        }
-        return out;
-    }
-    public void write7BitEncodedInt(int value) {
-        while (value >= 0x80) {
-            this.writeInt8((byte) value | 0x80);
-            value = value >> 7;
-        }
-        this.writeInt8((byte) value);
-    }
-    /*
-    Reading varint and varuint functions
-     */
-    public long readSignedVarLong() {
-        long raw = this.readUnsignedVarLong();
-        long temp = (((raw << 63) >> 63) ^ raw) >> 1;
-        return temp ^ (raw & (1L << 63));
-    }
-    public int readSignedVarInt() {
-        int raw = this.readUnsignedVarInt();
-        int temp = (((raw << 31) >> 31) ^ raw) >> 1;
-        return temp ^ (raw & (1 << 31));
-    }
-    public int readSignedVarInt() {
-        int raw = this.readUnsignedVarInt();
-        int temp = (((raw << 31) >> 31) ^ raw) >> 1;
-        return temp ^ (raw & (1 << 31));
-    }
-    public long readUnsignedVarLong() {
-        long value = 0L;
-        int i = 0;
-        long b;
-        while (((b = this.readInt8()) & 0x80L) != 0) {
-            value |= (b & 0x7F) << i;
-            i += 7;
-            if (i > 63) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
-            }
-        }
-        return value | (b << i);
-    }
-    public int readUnsignedVarInt() {
-        int value = 0;
-        int i = 0;
-        int b;
-        while (((b = this.readByte()) & 0x80) != 0) {
-            value |= (b & 0x7F) << i;
-            i += 7;
-            if (i > 35) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
-            }
-        }
-        return value | (b << i);
-    }
-    public int readUnsignedVarInt() {
-        int value = 0;
-        int i = 0;
-        byte rb = Byte.MIN_VALUE;
-        for (byte b : bytes) {
-            rb = b;
-            if ((b & 0x80) == 0) {
-                break;
-            }
-            value |= (b & 0x7f) << i;
-            i += 7;
-            if (i > 35) {
-                throw new IllegalArgumentException("Variable length quantity is too long");
-            }
-        }
-        return value | (rb << i);
-    }
-    public int read7BitEncodedInt() {
-        int i = 0;
-        int shift = 0;
-        byte b;
-        do {
-            b = this.readInt8();
-            i |= (b & 0x7f) << shift;
-            shift += 7;
-        } while ((b & 0x80) != 0);
-        return i;
-    }
-    /*
-    Read int and uint functions
-     */
+Read int and uint functions
+ */
     public int readInt8() {
+        return this.data[this.position++];
+    }
+    public byte readRawByte() {
         return this.data[this.position++];
     }
     public int readInt16() {
@@ -548,12 +437,115 @@ class ByteArrayJava {
     /*
     Reads IEEE 754 single-precision (32-bit) and IEEE 754 double-precision (64-bit) functions
      */
-    public double readDouble() {
+    /*public double readDouble() {
 		return Double.longBitsToDouble(this.readInt64());
 	}
 	public float readFloat() {
 		return Float.intBitsToFloat(this.readInt32());
-	}
+	}*/
+    /*
+    Writing varint and varuint functions
+     */
+    public void write7BitEncodedInt(int value) {
+        while (value >= 0x80) {
+            this.writeInt8((byte) value | 0x80);
+            value = value >> 7;
+        }
+        this.writeInt8((byte) value);
+    }
+    public void writeVarInt32(int value) {
+        while (true) {
+            if ((value & ~0x7F) == 0) {
+                this.writeRawByte(value);
+                return;
+            } else {
+                this.writeRawByte((value & 0x7F) | 0x80);
+                value >>>= 7;
+            }
+        }
+    }
+    public void writeVarInt64(long value) {
+        while (true) {
+            if ((value & ~0x7F) == 0) {
+                this.writeRawByte((int) value);
+                return;
+            } else {
+                this.writeRawByte(((int) value & 0x7F) | 0x80);
+                value >>>= 7;
+            }
+        }
+    }
+    public void writeVarUInt32(int value) {
+        this.writeVarInt32(value << 1 ^ value >> 31); // EncodeZigZag32
+    }
+    public void writeVarUInt64(long value) {
+        this.writeVarInt64(value << 1 ^ value >> 63); // EncodeZigZag64
+    }
+    /*
+    Reading varint and varuint functions
+     */
+    public int read7BitEncodedInt() {
+        int i = 0;
+        int shift = 0;
+        byte b;
+        do {
+            b = (byte) this.readInt8();
+            i |= (b & 0x7f) << shift;
+            shift += 7;
+        } while ((b & 0x80) != 0);
+        return i;
+    }
+    public int readVarInt32() {
+        byte tmp = this.readRawByte();
+        if (tmp >= 0) {
+            return tmp;
+        }
+        int result = tmp & 0x7f;
+        if ((tmp = this.readRawByte()) >= 0) {
+            result |= tmp << 7;
+        } else {
+            result |= (tmp & 0x7f) << 7;
+            if ((tmp = this.readRawByte()) >= 0) {
+                result |= tmp << 14;
+            } else {
+                result |= (tmp & 0x7f) << 14;
+                if ((tmp = this.readRawByte()) >= 0) {
+                    result |= tmp << 21;
+                } else {
+                    result |= (tmp & 0x7f) << 21;
+                    result |= (tmp = this.readRawByte()) << 28;
+                    if (tmp < 0) {
+                        // Discard upper 32 bits.
+                        for (int i = 0; i < 5; i++) {
+                            if (this.readRawByte() >= 0) {
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return result;
+    }
+    public long readVarInt64() {
+        int shift = 0;
+        long result = 0;
+        while (shift < 64) {
+            final byte b = this.readRawByte();
+            result |= (long) (b & 0x7F) << shift;
+            if ((b & 0x80) == 0) {
+                return result;
+            }
+            shift += 7;
+        }
+        return result;
+    }
+    public int readVarUInt32() {
+        return this.readVarInt32() >>> 1 ^ -(this.readVarInt32() & 1); // DecodeZigZag32
+    }
+    public long readVarUInt64() {
+        return this.readVarInt64() >>> 1 ^ -(this.readVarInt64() & 1L); // DecodeZigZag64
+    }
     /*
     Extra write functions
      */
@@ -644,9 +636,6 @@ class ByteArrayJava {
         return string.toString();
     }
     public List readMultiByte(int length) {
-        return this.readBytes(length);
-    }
-    public List readBytes(int length) {
         List array = new ArrayList();
         int nullbyte = 0;
         for (int i = 0; i < length; i++) {
@@ -658,10 +647,19 @@ class ByteArrayJava {
         System.out.print("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used.
         return array;
     }
+    public List readBytes(int length) {
+        ArrayList array = new ArrayList();
+        for (int i = 0; i < length; i++) {
+            array.add(this.readInt8());
+        }
+        return array;
+    }
 
     public static void main(String[] args) throws UTFDataFormatException {
         ByteArrayJava wba = new ByteArrayJava();
-        wba.writeInt8(5);
+        wba.writeVarUInt64(-58);
+        ByteArrayJava rba = new ByteArrayJava(wba);
+        System.out.print(rba.readVarUInt64());
         System.out.print(wba.arrayToString());
     }
 }
