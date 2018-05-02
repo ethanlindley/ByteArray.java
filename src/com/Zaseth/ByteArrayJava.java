@@ -83,9 +83,13 @@ class ByteArrayJava {
 		return value;
 	}
 
-	private String arrayToString() {
-		System.out.print("Bytes available: " + this.bytesAvailable() + "\r\nPosition: " + this.position + "\r\nByte stream: ");
-		return Arrays.toString(this.data).substring(0, 120);
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("Bytes available: " + this.bytesAvailable() + "\r\n");
+		sb.append("Position: " + this.position + "\r\n");
+		sb.append("Byte stream: " + Arrays.toString(this.data).substring(0, 120));
+		return sb.toString();
 	}
 
 	/*
@@ -108,7 +112,7 @@ class ByteArrayJava {
 			List list = new ArrayList(Arrays.asList(this.data));
 			list.addAll(Arrays.asList(newLength - prevLength));
 			Object[] c = list.toArray();
-			System.out.print(Arrays.toString(c));
+			System.out.println(Arrays.toString(c));
 		}
 		if (prevLength > newLength) {
 			this.data = Arrays.copyOfRange(this.data, newLength - 1, prevLength - 1);
@@ -697,7 +701,7 @@ class ByteArrayJava {
 			}
 			array.add((char) this.data[i]);
 		}
-		System.out.print("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used.
+		System.out.println("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used.
 		return array;
 	}
 
@@ -713,7 +717,7 @@ class ByteArrayJava {
 		ByteArrayJava wba = new ByteArrayJava();
 		wba.writeInt8(54);
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		System.out.print(rba.readInt8());
-		System.out.print(wba.arrayToString());
+		System.out.println(rba.readInt8());
+		System.out.println(wba.toString());
 	}
 }
