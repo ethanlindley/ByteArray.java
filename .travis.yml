@@ -1,7 +1,5 @@
-language: java
-cache: bundler
-sudo: false
-rvm: 2.2
-
-install: src/com/Zaseth/
-script: src/com/Zaseth/
+language: ruby
+rvm:
+ - 2.2
+ - jruby
+ - rbx-3
