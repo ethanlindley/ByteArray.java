@@ -107,14 +107,13 @@ class ByteArrayJava {
 		int prevLength = this.length();
 		if (prevLength != expectedLength) {
 			return prevLength;
-		}
-		if (prevLength < newLength) {
-			List list = new ArrayList(Arrays.asList(this.data));
-			list.addAll(Arrays.asList(newLength - prevLength));
-			Object[] c = list.toArray();
-			System.out.println(Arrays.toString(c));
-		}
-		if (prevLength > newLength) {
+		} else if (prevLength < newLength) {
+			this.data = new byte[this.length() + (newLength - prevLength)];
+			int i = 0;
+			for (Byte b :  new ArrayList<byte[]>(Arrays.asList(this.data)).toArray(new Byte[this.length() + (newLength - prevLength)])) {
+				this.data[i++] = b.byteValue();
+			}
+		} else if (prevLength > newLength) {
 			this.data = Arrays.copyOfRange(this.data, newLength - 1, prevLength - 1);
 		}
 		return prevLength;
