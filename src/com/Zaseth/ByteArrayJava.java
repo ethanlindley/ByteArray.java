@@ -15,8 +15,8 @@ class ByteArrayJava {
 	private int BUFFER_SIZE = 1024;
 
 	private boolean endian;
-
 	private boolean BIG_ENDIAN = true;
+	private boolean LITTLE_ENDIAN = false;
 
 	/*
 	Constructors
