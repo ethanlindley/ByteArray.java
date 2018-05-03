@@ -913,9 +913,8 @@ public class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeInt8(69);
+		wba.writeInt32(32);
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		System.out.println(rba.readInt8());
 		System.out.println(wba.toString());
 	}
 }
