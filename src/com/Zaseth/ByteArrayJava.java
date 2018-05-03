@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-class ByteArrayJava {
+public class ByteArrayJava {
 
 	private byte[] data;
 
