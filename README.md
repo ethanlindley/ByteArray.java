@@ -1,3 +1,5 @@
+![Travis](https://img.shields.io/travis/USER/REPO.svg)
+
 # Introduction
 ByteArray for Java (ByteArray.java) is a library for writing and reading bytes in Java. It's very easy to use and it's also very flexible, because every function is standalone and hardcoded, meaning that every function is able to use Big endian and Little endian as well as you can edit any function you'd like. Some of the examples you can work with is: Varints, Integers, Unsigned-Integers and more, and that all in Java! I hope you will find great use out of this interesting library for working with binary data in Java.
 
