@@ -1,0 +1,8 @@
+<?xml version = "1.0"?>
+<project name = "ByteArray.java" default = "info">
+    <property name = "wikiname" value = "www.github.com/Zaseth/ByteArray.java/wiki"/>
+
+    <target name = "info">
+        <echo>Apache Ant version is ${ant.version} - Documentation is located at ${wikiname} </echo>
+    </target>
+</project>
