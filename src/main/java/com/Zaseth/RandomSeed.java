@@ -1,3 +1,5 @@
+package com.Zaseth;
+
 class RandomSeeder {
     private int rndSeed = 327680;
     private int finishedSeed = 0;

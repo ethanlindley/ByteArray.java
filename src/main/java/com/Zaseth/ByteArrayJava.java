@@ -1,10 +1,11 @@
 package com.Zaseth;
 
-import com.Zaseth.ByteArrayLogger;
 import java.io.UTFDataFormatException;
 import java.nio.charset.Charset;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 
 public class ByteArrayJava {
@@ -19,7 +20,7 @@ public class ByteArrayJava {
 	private boolean BIG_ENDIAN = true;
 	private boolean LITTLE_ENDIAN = false;
 
-	/*
+    /*
 	Constructors
 	 */
 	public ByteArrayJava(ByteArrayJava buff) {
@@ -86,8 +87,25 @@ public class ByteArrayJava {
 
 	@Override
 	public String toString() {
-		return new ByteArrayLogger().stringToByteArray(this.bytesAvailable(), this.position, this.data);
+        StringBuilder sb = new StringBuilder();
+        sb.append("Bytes available: " + this.bytesAvailable() + "\r\n");
+        sb.append("Position: " + this.position + "\r\n");
+        sb.append("Byte stream: " + Arrays.toString(this.data).substring(0, 120));
+        return this.Debug(sb.toString());
 	}
+
+    public String getTime() {
+        return new SimpleDateFormat("yyyy-MM-dd-)HH:mm:ss").format(Calendar.getInstance().getTime());
+    }
+
+    public String Debug(String sb) {
+        String toPrint = "<DEBUG=";
+        toPrint += this.getTime();
+        toPrint += ">\r\n" + sb;
+        toPrint += "\r\n</DEBUG>";
+        return toPrint;
+    }
+
 
 	/*
 	Extra method functions
@@ -853,6 +871,14 @@ public class ByteArrayJava {
 		}
 	}
 
+    public void writeBoolean(boolean v) {
+        if (v) {
+            this.writeInt8(1);
+        } else {
+            this.writeInt8(0);
+        }
+    }
+
 	/*
 	Extra read functions
 	 */
@@ -908,10 +934,15 @@ public class ByteArrayJava {
 		return array;
 	}
 
+	public boolean readBoolean() {
+		return this.readInt8() == 1;
+	}
+
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeInt32(32);
+		wba.writeBoolean(true);
 		ByteArrayJava rba = new ByteArrayJava(wba);
+		rba.readBoolean();
 		System.out.println(wba.toString());
 	}
 }
