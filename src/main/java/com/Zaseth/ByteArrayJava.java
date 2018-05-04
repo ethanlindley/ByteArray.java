@@ -20,8 +20,8 @@ public class ByteArrayJava {
 	private boolean BIG_ENDIAN = true;
 	private boolean LITTLE_ENDIAN = false;
 
-    /*
-	Constructors
+	/*
+	Constructor
 	 */
 	public ByteArrayJava(ByteArrayJava buff) {
 		if (buff instanceof ByteArrayJava) {
@@ -86,13 +86,13 @@ public class ByteArrayJava {
 	}
 
 	@Override
-	public String toString() {
-        StringBuilder sb = new StringBuilder();
+    public String toString() {
+	    StringBuilder sb = new StringBuilder();
         sb.append("Bytes available: " + this.bytesAvailable() + "\r\n");
         sb.append("Position: " + this.position + "\r\n");
         sb.append("Byte stream: " + Arrays.toString(this.data).substring(0, 120));
         return this.Debug(sb.toString());
-	}
+    }
 
     public String getTime() {
         return new SimpleDateFormat("yyyy-MM-dd-)HH:mm:ss").format(Calendar.getInstance().getTime());
@@ -104,6 +104,14 @@ public class ByteArrayJava {
         toPrint += ">\r\n" + sb;
         toPrint += "\r\n</DEBUG>";
         return toPrint;
+    }
+
+    public String Error(String errorMessage) {
+	    String toPrint = "<ERROR=";
+	    toPrint += this.getTime();
+	    toPrint += ">\r\n" + errorMessage;
+	    toPrint += "\r\n</ERROR>";
+	    return toPrint;
     }
 
 
@@ -604,22 +612,22 @@ public class ByteArrayJava {
 	}
 
 	public int readUInt29() {
-		int b = this.readUInt8() & 0xFF;
+		int b = this.readUInt8();
 		if (b < 128) {
 			return b;
 		}
 		int value = (b & 0x7F) << 7;
-		b = this.readUInt8() & 0xFF;
+		b = this.readUInt8();
 		if (b < 128) {
 			return (value | b);
 		}
 		value = (value | (b & 0x7F)) << 7;
-		b = this.readUInt8() & 0xFF;
+		b = this.readUInt8();
 		if (b < 128) {
 			return (value | b);
 		}
 		value = (value | (b & 0x7F)) << 8;
-		b = this.readUInt8() & 0xFF;
+		b = this.readUInt8();
 		return (value | b);
 	}
 
@@ -759,28 +767,28 @@ public class ByteArrayJava {
 	}
 
 	public int readVarInt32() {
-		byte tmp = this.readRawByte();
+		byte tmp = (byte) this.readInt8();
 		if (tmp >= 0) {
 			return tmp;
 		}
 		int result = tmp & 0x7f;
-		if ((tmp = this.readRawByte()) >= 0) {
+		if ((tmp = (byte) this.readInt8()) >= 0) {
 			result |= tmp << 7;
 		} else {
 			result |= (tmp & 0x7f) << 7;
-			if ((tmp = this.readRawByte()) >= 0) {
+			if ((tmp = (byte) this.readInt8()) >= 0) {
 				result |= tmp << 14;
 			} else {
 				result |= (tmp & 0x7f) << 14;
-				if ((tmp = this.readRawByte()) >= 0) {
+				if ((tmp = (byte) this.readInt8()) >= 0) {
 					result |= tmp << 21;
 				} else {
 					result |= (tmp & 0x7f) << 21;
-					result |= (tmp = this.readRawByte()) << 28;
+					result |= (tmp = (byte) this.readInt8()) << 28;
 					if (tmp < 0) {
 						// Discard upper 32 bits.
 						for (int i = 0; i < 5; i++) {
-							if (this.readRawByte() >= 0) {
+							if (this.readInt8() >= 0) {
 								return result;
 							}
 						}
@@ -795,7 +803,7 @@ public class ByteArrayJava {
 		int shift = 0;
 		long result = 0;
 		while (shift < 64) {
-			final byte b = this.readRawByte();
+			final byte b = (byte) this.readInt8();
 			result |= (long) (b & 0x7F) << shift;
 			if ((b & 0x80) == 0) {
 				return result;
@@ -940,9 +948,9 @@ public class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeBoolean(true);
+		wba.writeVarUInt32(-2);
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		rba.readBoolean();
+		System.out.println(rba.readVarUInt32());
 		System.out.println(wba.toString());
 	}
 }
