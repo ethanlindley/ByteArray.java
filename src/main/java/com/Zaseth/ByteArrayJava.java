@@ -37,7 +37,7 @@ public class ByteArrayJava {
 	public ByteArrayJava(int length) {
 		this.data = new byte[length];
 		this.position = 0;
-        this.nullBytes = 0;
+		this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
