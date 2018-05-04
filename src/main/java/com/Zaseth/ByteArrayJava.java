@@ -44,7 +44,7 @@ public class ByteArrayJava {
 	public ByteArrayJava() {
 		this.data = new byte[this.BUFFER_SIZE];
 		this.position = 0;
-        this.nullBytes = 0;
+		this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
