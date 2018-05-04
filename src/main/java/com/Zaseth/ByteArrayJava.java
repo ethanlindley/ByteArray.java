@@ -24,8 +24,8 @@ public class ByteArrayJava {
 	 */
 	public ByteArrayJava(ByteArrayJava buff) {
 	    if (buff == null) {
-	        throw new IllegalArgumentException("Can't read from empty byte stream");
-        }
+	    	throw new IllegalArgumentException("Can't read from empty byte stream");
+	    }
 		if (buff instanceof ByteArrayJava) {
 			this.data = buff.data;
 		}
