@@ -1,5 +1,6 @@
 package com.Zaseth;
 
+import com.Zaseth.ByteArrayLogger;
 import java.io.UTFDataFormatException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -85,11 +86,7 @@ public class ByteArrayJava {
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("Bytes available: " + this.bytesAvailable() + "\r\n");
-		sb.append("Position: " + this.position + "\r\n");
-		sb.append("Byte stream: " + Arrays.toString(this.data).substring(0, 120));
-		return sb.toString();
+		return new ByteArrayLogger().stringToByteArray(this.bytesAvailable(), this.position, this.data);
 	}
 
 	/*
