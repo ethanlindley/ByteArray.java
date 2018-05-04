@@ -2,10 +2,8 @@ package com.Zaseth;
 
 import java.io.UTFDataFormatException;
 import java.nio.charset.Charset;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.List;
 
 public class ByteArrayJava {
@@ -13,6 +11,7 @@ public class ByteArrayJava {
 	private byte[] data;
 
 	private int position;
+	private int nullBytes;
 
 	private int BUFFER_SIZE = 1024;
 
@@ -24,22 +23,28 @@ public class ByteArrayJava {
 	Constructor
 	 */
 	public ByteArrayJava(ByteArrayJava buff) {
+	    if (buff == null) {
+	        throw new IllegalArgumentException("Can't read from empty byte stream");
+        }
 		if (buff instanceof ByteArrayJava) {
 			this.data = buff.data;
 		}
 		this.position = 0;
+	    this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
 	public ByteArrayJava(int length) {
 		this.data = new byte[length];
 		this.position = 0;
+        this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
 	public ByteArrayJava() {
 		this.data = new byte[this.BUFFER_SIZE];
 		this.position = 0;
+        this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
@@ -87,33 +92,12 @@ public class ByteArrayJava {
 
 	@Override
     public String toString() {
-	    StringBuilder sb = new StringBuilder();
-        sb.append("Bytes available: " + this.bytesAvailable() + "\r\n");
-        sb.append("Position: " + this.position + "\r\n");
-        sb.append("Byte stream: " + Arrays.toString(this.data).substring(0, 120));
-        return this.Debug(sb.toString());
+	    return this.Debug(new StringBuilder().append("Bytes available: " + this.bytesAvailable() + "\r\nPosition: " + this.position + "\r\nNullbytes: " + this.nullBytes + "\r\nByte stream: " + Arrays.toString(this.data).substring(0,120)).toString());
     }
 
-    public String getTime() {
-        return new SimpleDateFormat("yyyy-MM-dd-)HH:mm:ss").format(Calendar.getInstance().getTime());
+    public String Debug(String debugMessage) {
+	    return "<DEBUG>\r\n" +  debugMessage + "\r\n</DEBUG>";
     }
-
-    public String Debug(String sb) {
-        String toPrint = "<DEBUG=";
-        toPrint += this.getTime();
-        toPrint += ">\r\n" + sb;
-        toPrint += "\r\n</DEBUG>";
-        return toPrint;
-    }
-
-    public String Error(String errorMessage) {
-	    String toPrint = "<ERROR=";
-	    toPrint += this.getTime();
-	    toPrint += ">\r\n" + errorMessage;
-	    toPrint += "\r\n</ERROR>";
-	    return toPrint;
-    }
-
 
 	/*
 	Extra method functions
@@ -876,6 +860,9 @@ public class ByteArrayJava {
 		for (int var4 = 0; var4 < var3; ++var4) {
 			byte element$iv = v[var4];
 			this.writeInt8(element$iv);
+            if (this.data[var4] == 0) {
+                this.nullBytes++;
+            }
 		}
 	}
 
@@ -923,14 +910,9 @@ public class ByteArrayJava {
 
 	public List<Character> readMultiByte(int length) {
 		List<Character> array = new ArrayList<Character>();
-		int nullbyte = 0;
 		for (int i = 0; i < length; i++) {
-			if (this.data[i] == 0) {
-				nullbyte++;
-			}
 			array.add((char) this.data[i]);
 		}
-		System.out.println("Nullbytes: " + nullbyte + "\r\n"); // 100% accurate only when writeMultiByte is used
 		return array;
 	}
 
@@ -948,9 +930,9 @@ public class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeVarUInt32(-2);
+		wba.writeMultiByte("Hello", "UTF-16BE");
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		System.out.println(rba.readVarUInt32());
+		System.out.println(rba.readMultiByte(10));
 		System.out.println(wba.toString());
 	}
 }
