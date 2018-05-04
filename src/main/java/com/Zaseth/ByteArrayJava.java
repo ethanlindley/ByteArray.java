@@ -30,7 +30,7 @@ public class ByteArrayJava {
 			this.data = buff.data;
 		}
 		this.position = 0;
-        this.nullBytes = 0;
+		this.nullBytes = 0;
 		this.endian = this.BIG_ENDIAN;
 	}
 
