@@ -743,7 +743,7 @@ public class ByteArrayJava {
 		int shift = 0;
 		byte b;
 		do {
-            b = (byte) this.readInt8();
+			b = (byte) this.readInt8();
 			i |= (b & 0x7f) << shift;
 			shift += 7;
 		} while ((b & 0x80) != 0);
