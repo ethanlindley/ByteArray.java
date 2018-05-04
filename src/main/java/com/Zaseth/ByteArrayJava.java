@@ -97,8 +97,8 @@ public class ByteArrayJava {
 
 	public String Debug(String debugMessage) {
 		return "<DEBUG>\r\n" +  debugMessage + "\r\n</DEBUG>";
-    }
-
+	}
+	
 	/*
 	Extra method functions
 	 */
