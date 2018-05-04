@@ -93,9 +93,9 @@ public class ByteArrayJava {
 	@Override
 	public String toString() {
 		return this.Debug(new StringBuilder().append("Bytes available: " + this.bytesAvailable() + "\r\nPosition: " + this.position + "\r\nNullbytes: " + this.nullBytes + "\r\nByte stream: " + Arrays.toString(this.data).substring(0,120)).toString());
-    }
+	}
 
-    public String Debug(String debugMessage) {
+	public String Debug(String debugMessage) {
     	return "<DEBUG>\r\n" +  debugMessage + "\r\n</DEBUG>";
     }
 
