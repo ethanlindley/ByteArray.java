@@ -3,10 +3,16 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>Zaseth</groupId>
     <artifactId>ByteArray.java</artifactId>
     <version>3.7.0</version>
+    <url>https://github.com/Zaseth/ByteArray.java/wiki</url>
+    <name>ByteArray.java</name>
+    <description>A very simple script for writing and reading bytes in Java </description>
+    <organization>
+  	<name>Zaseth</name>
+  	<url>https://github.com/Zaseth/</url>
+    </organization>
     <properties>
     	<maven-compiler-plugin-version>3.7.0</maven-compiler-plugin-version>
     </properties>
