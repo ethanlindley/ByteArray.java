@@ -55,10 +55,19 @@ public class ByteArrayJava {
 		this.position = 0;
 		this.data = new byte[this.BUFFER_SIZE];
 	}
+	
+	public void clear(byte[] data, int position) {
+	    this.data = data;
+	    this.position = position;
+    }
 
 	public void setEndian(boolean e) {
 		this.endian = e;
 	}
+	
+	public boolean getEndian() {
+	    return this.endian;
+    }
 
 	public int moveLeft(int v) {
 		return this.position -= v;
@@ -155,6 +164,20 @@ public class ByteArrayJava {
 			throw new ArrayIndexOutOfBoundsException("Trying to access beyond buffer length");
 		}
 	}
+    
+    public byte get7BitValueSize(int value) {
+        return this.get7BitValueSize( (long)value);
+    }
+    
+    public static byte get7BitValueSize(long value) {
+        long limit = 0x80;
+        byte result = 1;
+        while(value>=limit) {
+            limit <<= 7;
+            ++result;
+        }
+        return result;
+    }
 
 	/*
 	Writing int and uint functions
@@ -349,19 +372,19 @@ public class ByteArrayJava {
 
 	public void writeUInt29(int v) {
 		if (128 > v) {
-			this.writeUInt8(v);
+			this.writeInt8(v);
 		} else if (16384 > v) {
-			this.writeUInt8(v >>> 7 & 127 | 128);
-			this.writeUInt8(v & 127);
+			this.writeInt8(v >>> 7 & 127 | 128);
+			this.writeInt8(v & 127);
 		} else if (2097152 > v) {
-			this.writeUInt8(v >>> 14 & 127 | 128);
-			this.writeUInt8(v >>> 7 & 127 | 128);
-			this.writeUInt8(v & 127);
+			this.writeInt8(v >>> 14 & 127 | 128);
+			this.writeInt8(v >>> 7 & 127 | 128);
+			this.writeInt8(v & 127);
 		} else if (1073741824 > v) {
-			this.writeUInt8(v >>> 22 & 127 | 128);
-			this.writeUInt8(v >>> 15 & 127 | 128);
-			this.writeUInt8(v >>> 8 & 127 | 128);
-			this.writeUInt8(v & 255);
+			this.writeInt8(v >>> 22 & 127 | 128);
+			this.writeInt8(v >>> 15 & 127 | 128);
+			this.writeInt8(v >>> 8 & 127 | 128);
+			this.writeInt8(v & 255);
 		} else {
 			throw new IllegalArgumentException("Integer out of range: " + v);
 		}
@@ -696,12 +719,30 @@ public class ByteArrayJava {
 	Writing varint and varuint functions
 	 */
 	public void write7BitEncodedInt(int value) {
-		while (value >= 0x80) {
-			this.writeInt8((byte) value | 0x80);
-			value = value >> 7;
-		}
-		this.writeInt8((byte) value);
-	}
+	    byte shift = (byte) ((this.get7BitValueSize(value) - 1) * 7);
+	    boolean max = false;
+	    if (shift >= 21) {
+	        shift = 22;
+	        max = true;
+        }
+        while (shift >= 7) {
+	        this.writeInt8((0x80 | ((value >> shift) & 0x7F)));
+	        shift -= 7;
+        }
+        this.writeInt8((max ? (value & 0xFF) : (value & 0x7F)));
+    }
+    public void write7BitEncodedLong(long value) {
+	    byte shift = (byte) ((this.get7BitValueSize(value) - 1) * 7);
+	    boolean max = (shift >= 63);
+	    if (max) {
+	        shift++;
+        }
+        while (shift >= 7) {
+	        this.writeInt8((byte) (0x80 | ((value >> shift) & 0x7F)));
+	        shift -= 7;
+        }
+        this.writeInt8((byte) (max ? (value & 0xFF) : (value & 0x7F)));
+    }
 
 	public void writeVarInt32(int value) {
 		while (true) {
@@ -738,17 +779,35 @@ public class ByteArrayJava {
 	/*
 	Reading varint and varuint functions
 	 */
-	public int read7BitEncodedInt() {
-		int i = 0;
-		int shift = 0;
-		byte b;
-		do {
-			b = (byte) this.readInt8();
-			i |= (b & 0x7f) << shift;
-			shift += 7;
-		} while ((b & 0x80) != 0);
-		return i;
-	}
+    public int read7BitEncodedInt() {
+        int n = 0;
+        int b = this.readUInt8();
+        int result = 0;
+        while (b >= 128 && n < 3) {
+            result <<= 7;
+            result |= (b&0x7F);
+            b = this.readUInt8();
+            ++n;
+        }
+        result <<= ((n<3) ? 7 : 8);
+        result |= b;
+        return result;
+    }
+    
+    public long read7BitEncodedLong() {
+        int n = 0;
+        int b = this.readUInt8();
+        long result = 0;
+        while (b >= 128 && n < 8) {
+            result <<= 7;
+            result |= (b&0x7F);
+            b = this.readUInt8();
+            ++n;
+        }
+        result <<= ((n<8) ? 7 : 8);
+        result |= b;
+        return result;
+    }
 
 	public int readVarInt32() {
 		byte tmp = (byte) this.readInt8();
@@ -852,10 +911,10 @@ public class ByteArrayJava {
 																							// charset
 			}
 		}
-		this.writeBytes(v.getBytes(cs)); // Converts the string into bytes
+		this.writeInt8Array(v.getBytes(cs)); // Converts the string into bytes
 	}
 
-	public void writeBytes(byte[] v) {
+	public void writeInt8Array(byte[] v) {
 		int var3 = v.length;
 		for (int var4 = 0; var4 < var3; ++var4) {
 			byte element$iv = v[var4];
@@ -865,6 +924,16 @@ public class ByteArrayJava {
             }
 		}
 	}
+	
+	public void writeBytes(byte bytes[], int offset, int length) {
+	    if ((offset < 0 ) || (offset > bytes.length) || (length < 0) || ((offset + length) > bytes.length) || ((offset + length) < 0)) {
+	        throw new IndexOutOfBoundsException();
+        } else if (length == 0) {
+	        return;
+        }
+        System.arraycopy(bytes, offset, this.data, this.position, length);
+	    this.position = this.position + length;
+    }
 
     public void writeBoolean(boolean v) {
         if (v) {
@@ -916,13 +985,19 @@ public class ByteArrayJava {
 		return array;
 	}
 
-	public List<Integer> readBytes(int length) {
+	public List<Integer> readInt8Array(int length) {
 		ArrayList<Integer> array = new ArrayList<Integer>();
 		for (int i = 0; i < length; i++) {
 			array.add(this.readInt8());
 		}
 		return array;
 	}
+	
+	public byte[] readBytes(int length) {
+	    byte bytes[] = Arrays.copyOfRange(this.data, this.position, this.position + length);
+	    this.position += length;
+	    return bytes;
+    }
 
 	public boolean readBoolean() {
 		return this.readInt8() == 1;
@@ -930,9 +1005,9 @@ public class ByteArrayJava {
 
 	public static void main(String[] args) throws UTFDataFormatException {
 		ByteArrayJava wba = new ByteArrayJava();
-		wba.writeMultiByte("Hello", "UTF-16BE");
+		wba.writeBoolean(true);
 		ByteArrayJava rba = new ByteArrayJava(wba);
-		System.out.println(rba.readMultiByte(10));
+		System.out.println(rba.readBoolean());
 		System.out.println(wba.toString());
 	}
 }
