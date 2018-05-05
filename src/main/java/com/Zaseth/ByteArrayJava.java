@@ -139,11 +139,7 @@ public class ByteArrayJava {
     Help functions
      */
     public static String fromCharCode(int... codePoints) { // https://stackoverflow.com/a/2946081/6636193
-        StringBuilder builder = new StringBuilder(codePoints.length);
-        for (int codePoint : codePoints) {
-            builder.append(Character.toChars(codePoint));
-        }
-        return builder.toString();
+        return new String(codePoints, 0, codePoints.length);
     }
     
     private void checkInt(int value, int offset, int ext, int max, int min) {
