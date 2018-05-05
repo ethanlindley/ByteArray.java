@@ -22,10 +22,6 @@ class RandomSeeder {
     public void setSeed(int value) {
         this.rndSeed = Math.abs(value);
     }
-    
-    public void setFinishedSeed(int value) {
-        this.finishedSeed = Math.abs(value);
-    }
 
     public int getSeed() {
         return this.rndSeed;
